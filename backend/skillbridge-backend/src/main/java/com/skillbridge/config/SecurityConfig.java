@@ -147,7 +147,7 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of("https://skill-bridge-liart-one.vercel.app")
         );
 
         configuration.setAllowedMethods(
@@ -161,7 +161,7 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("*")
+                List.of("https://skill-bridge-liart-one.vercel.app")
         );
 
         configuration.setAllowCredentials(true);
