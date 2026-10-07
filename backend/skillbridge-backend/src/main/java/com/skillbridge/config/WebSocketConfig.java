@@ -48,7 +48,7 @@ public class WebSocketConfig
         registry
                 .addEndpoint("/ws")
         .setAllowedOriginPatterns(
-                "https://skill-bridge-liart-one.vercel.app"
+                "https://skill-bridge-dun-three.vercel.app/"
         );
     }
 

@@ -147,7 +147,7 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("https://skill-bridge-liart-one.vercel.app")
+                List.of("https://skill-bridge-dun-three.vercel.app/")
         );
 
         configuration.setAllowedMethods(
