@@ -1,0 +1,222 @@
+.app-footer {
+    width: 100%;
+    background: #0f172a;
+    color: #cbd5e1;
+    margin-top: 50px;
+}
+
+
+/* =========================================
+   FOOTER CONTENT
+========================================= */
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 45px 25px 35px;
+
+    display: grid;
+
+    grid-template-columns:
+        1.5fr
+        1fr
+        1fr
+        1.2fr;
+
+    gap: 45px;
+}
+
+
+/* =========================================
+   FOOTER SECTIONS
+========================================= */
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+
+/* =========================================
+   BRAND
+========================================= */
+
+.footer-brand h3 {
+    margin: 0 0 8px;
+
+    color: #ffffff;
+
+    font-size: 24px;
+
+    font-weight: 700;
+}
+
+.footer-brand > p:first-of-type {
+    margin: 0 0 15px;
+
+    color: #60a5fa;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.footer-description {
+    max-width: 280px;
+
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================
+   HEADINGS
+========================================= */
+
+.footer-section h4 {
+    margin: 0 0 16px;
+
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   QUICK LINKS
+========================================= */
+
+.footer-section button {
+    padding: 0;
+
+    margin: 0 0 10px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+
+    text-align: left;
+}
+
+.footer-section button:hover {
+    color: #60a5fa;
+
+    transform: translateX(4px);
+}
+
+
+/* =========================================
+   COPYRIGHT
+========================================= */
+
+.footer-copyright h4 {
+    color: #60a5fa;
+
+    line-height: 1.5;
+}
+
+.footer-copyright p {
+    margin: 0 0 7px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   FOOTER BOTTOM
+========================================= */
+
+.footer-bottom {
+    max-width: 1200px;
+
+    margin: 0 auto;
+
+    padding: 18px 25px;
+
+    border-top: 1px solid #1e293b;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+}
+
+.footer-bottom p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+    .footer-content {
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 35px;
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    .footer-content {
+        grid-template-columns: 1fr;
+
+        padding:
+            35px 25px 25px;
+
+        gap: 30px;
+    }
+
+    .footer-description {
+        max-width: 100%;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+
+        text-align: center;
+
+        padding:
+            18px 20px;
+    }
+
+    .footer-section button:hover {
+        transform: none;
+    }
+}

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SkillBridge Chat</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin: 15px 5px 10px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #connectBtn {
+            background: #2196f3;
+            color: white;
+        }
+
+        #subscribeBtn {
+            background: #4caf50;
+            color: white;
+        }
+
+        #sendBtn {
+            background: #ff9800;
+            color: white;
+        }
+
+        button:disabled {
+            background: #aaa !important;
+            cursor: not-allowed;
+        }
+
+        #status {
+            font-weight: bold;
+        }
+
+        #messages {
+            margin-top: 15px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>SkillBridge WebSocket Chat</h2>
+
+    <!-- JWT -->
+    <label>JWT Token</label>
+
+    <input
+        type="text"
+        id="token"
+        placeholder="Paste your JWT token here"
+    >
+
+    <!-- Connection ID -->
+    <label>Connection ID</label>
+
+    <input
+        type="number"
+        id="connectionId"
+        value="1"
+    >
+
+    <!-- Message -->
+    <label>Message</label>
+
+    <input
+        type="text"
+        id="message"
+        value="Hello Rahul!"
+    >
+
+    <br>
+
+    <!-- Buttons -->
+
+    <button
+        id="connectBtn"
+        onclick="connect()">
+        Connect
+    </button>
+
+    <button
+        id="subscribeBtn"
+        onclick="subscribe()"
+        disabled>
+        Subscribe
+    </button>
+
+    <button
+        id="sendBtn"
+        onclick="sendMessage()"
+        disabled>
+        Send Message
+    </button>
+
+    <h3>Status</h3>
+
+    <p id="status">
+        Disconnected
+    </p>
+
+    <h3>Messages</h3>
+
+    <div id="messages"></div>
+
+</div>
+
+
+<script>
+
+let socket = null;
+
+let stompConnected = false;
+
+let subscribed = false;
+
+
+// =====================================================
+// SHOW MESSAGE
+// =====================================================
+
+function show(message) {
+
+    const messages =
+        document.getElementById("messages");
+
+    messages.innerText +=
+        message + "\n\n";
+
+    messages.scrollTop =
+        messages.scrollHeight;
+}
+
+
+// =====================================================
+// GET TOKEN
+// =====================================================
+
+function getToken() {
+
+    let token =
+        document.getElementById("token").value.trim();
+
+    if (!token) {
+
+        alert(
+            "Please paste your JWT token first."
+        );
+
+        return null;
+    }
+
+    // If user accidentally enters
+    // "Bearer eyJ..."
+    // remove Bearer
+
+    if (token.startsWith("Bearer ")) {
+
+        token =
+            token.substring(7).trim();
+    }
+
+    return token;
+}
+
+
+// =====================================================
+// CONNECT
+// =====================================================
+
+function connect() {
+
+    const token = getToken();
+
+    if (!token) {
+        return;
+    }
+
+
+    if (socket &&
+        socket.readyState === WebSocket.OPEN) {
+
+        show(
+            "WebSocket is already connected."
+        );
+
+        return;
+    }
+
+
+    show(
+        "Connecting to ws://localhost:8080/ws..."
+    );
+
+
+    socket =
+        new WebSocket(
+            "ws://localhost:8080/ws"
+        );
+
+
+    // =================================================
+    // WEBSOCKET OPEN
+    // =================================================
+
+    socket.onopen = function () {
+
+        show(
+            "WebSocket connected."
+        );
+
+
+        document
+            .getElementById("status")
+            .innerText =
+            "WebSocket connected";
+
+
+        // STOMP CONNECT FRAME
+
+        const frame =
+            "CONNECT\n" +
+            "accept-version:1.2\n" +
+            "host:localhost\n" +
+            "Authorization:Bearer " +
+            token +
+            "\n\n" +
+            "\0";
+
+
+        socket.send(frame);
+
+
+        show(
+            "STOMP CONNECT sent."
+        );
+    };
+
+
+    // =================================================
+    // SERVER MESSAGE
+    // =================================================
+
+    socket.onmessage = function(event) {
+
+        console.log(
+            "SERVER:",
+            event.data
+        );
+
+
+        show(
+            "SERVER:\n" +
+            event.data
+        );
+
+
+        // CONNECTED
+
+        if (
+            event.data.startsWith("CONNECTED")
+        ) {
+
+            stompConnected = true;
+
+            document
+                .getElementById("status")
+                .innerText =
+                "STOMP Connected";
+
+
+            document
+                .getElementById("subscribeBtn")
+                .disabled = false;
+
+
+            document
+                .getElementById("sendBtn")
+                .disabled = false;
+
+
+            show(
+                "STOMP connection successful."
+            );
+        }
+
+
+        // MESSAGE
+
+        if (
+            event.data.startsWith("MESSAGE")
+        ) {
+
+            show(
+                "Chat message received."
+            );
+        }
+
+
+        // ERROR
+
+        if (
+            event.data.startsWith("ERROR")
+        ) {
+
+            show(
+                "STOMP ERROR received."
+            );
+        }
+    };
+
+
+    // =================================================
+    // ERROR
+    // =================================================
+
+    socket.onerror = function(error) {
+
+        console.error(
+            "WebSocket error:",
+            error
+        );
+
+
+        document
+            .getElementById("status")
+            .innerText =
+            "WebSocket Error";
+
+
+        show(
+            "WebSocket error occurred."
+        );
+    };
+
+
+    // =================================================
+    // CLOSE
+    // =================================================
+
+    socket.onclose = function() {
+
+        stompConnected = false;
+
+        subscribed = false;
+
+
+        document
+            .getElementById("status")
+            .innerText =
+            "Disconnected";
+
+
+        document
+            .getElementById("subscribeBtn")
+            .disabled = true;
+
+
+        document
+            .getElementById("sendBtn")
+            .disabled = true;
+
+
+        show(
+            "WebSocket connection closed."
+        );
+    };
+}
+
+
+// =====================================================
+// SUBSCRIBE
+// =====================================================
+
+function subscribe() {
+
+    if (!stompConnected) {
+
+        alert(
+            "Please connect first."
+        );
+
+        return;
+    }
+
+
+    const token = getToken();
+
+    if (!token) {
+        return;
+    }
+
+
+    const connectionId =
+        document
+            .getElementById("connectionId")
+            .value;
+
+
+    if (!connectionId) {
+
+        alert(
+            "Enter connection ID."
+        );
+
+        return;
+    }
+
+
+    // STOMP SUBSCRIBE
+
+    const frame =
+        "SUBSCRIBE\n" +
+        "id:sub-0\n" +
+        "destination:/topic/chat/" +
+        connectionId +
+        "\n" +
+        "Authorization:Bearer " +
+        token +
+        "\n\n" +
+        "\0";
+
+
+    socket.send(frame);
+
+
+    subscribed = true;
+
+
+    show(
+        "Subscribed to /topic/chat/" +
+        connectionId
+    );
+}
+
+
+// =====================================================
+// SEND MESSAGE
+// =====================================================
+
+function sendMessage() {
+
+    if (!stompConnected) {
+
+        alert(
+            "Please connect first."
+        );
+
+        return;
+    }
+
+
+    if (!subscribed) {
+
+        alert(
+            "Please click Subscribe first."
+        );
+
+        return;
+    }
+
+
+    const token = getToken();
+
+    if (!token) {
+        return;
+    }
+
+
+    const connectionId =
+        document
+            .getElementById("connectionId")
+            .value;
+
+
+    const content =
+        document
+            .getElementById("message")
+            .value
+            .trim();
+
+
+    if (!connectionId) {
+
+        alert(
+            "Enter connection ID."
+        );
+
+        return;
+    }
+
+
+    if (!content) {
+
+        alert(
+            "Enter a message."
+        );
+
+        return;
+    }
+
+
+    // =================================================
+    // MESSAGE BODY
+    // =================================================
+
+    const body =
+        JSON.stringify({
+
+            connectionId:
+                Number(connectionId),
+
+            content:
+                content
+
+        });
+
+
+    // =================================================
+    // SEND FRAME
+    // =================================================
+
+    const frame =
+        "SEND\n" +
+        "destination:/app/chat\n" +
+        "content-type:application/json\n" +
+        "Authorization:Bearer " +
+        token +
+        "\n" +
+        "content-length:" +
+        new TextEncoder()
+            .encode(body)
+            .length +
+        "\n\n" +
+        body +
+        "\0";
+
+
+    socket.send(frame);
+
+
+    show(
+        "YOU:\n" +
+        body
+    );
+
+
+    // Clear message box
+
+    document
+        .getElementById("message")
+        .value = "";
+}
+
+</script>
+
+</body>
+</html>
