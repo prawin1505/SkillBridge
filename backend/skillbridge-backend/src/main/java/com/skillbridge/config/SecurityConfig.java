@@ -161,8 +161,13 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-                List.of("https://skill-bridge-liart-one.vercel.app")
-        );
+        List.of(
+            "Authorization",
+            "Content-Type",
+            "Accept",
+            "Origin"
+        )
+);
 
         configuration.setAllowCredentials(true);
 
